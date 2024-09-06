@@ -1,0 +1,57 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.xiaoyi'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'GBK'
+}
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'GBK'
+}
+tasks.withType(JavaExec).configureEach {
+    jvmArgs = ['-Dfile.encoding=GBK', '-Dsun.stdout.encoding=GBK', '-Dsun.stderr.encoding=GBK']
+}
+
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+configurations.configureEach {
+    exclude group: 'org.slf4j', module: 'slf4j-simple'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'junit:junit:4.13.1'
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.mnode.ical4j:ical4j:4.0.1'
+    implementation 'org.slf4j:slf4j-simple:2.0.0'  // 添加这个依赖来处理SLF4J日志
+    implementation('org.springframework.boot:spring-boot-starter-webflux') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+    implementation 'ch.qos.logback:logback-classic'
+    implementation 'net.sf.biweekly:biweekly:0.6.8'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

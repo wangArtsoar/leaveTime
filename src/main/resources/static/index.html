@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>downHair</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="input-group">
+        <label for="start-time">开始时间:</label>
+        <input type="datetime-local" id="start-time">
+    </div>
+    <div class="input-group">
+        <label for="end-time">结束时间:</label>
+        <input type="datetime-local" id="end-time">
+    </div>
+    <button onclick="submitTime()">提交</button>
+    <div class="output" id="output"></div>
+</div>
+
+<script>
+    function formatDateTime(dateTime) {
+        const date = new Date(dateTime);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    async function submitTime() {
+        const startTime = document.getElementById('start-time').value;
+        const endTime = document.getElementById('end-time').value;
+        const output = document.getElementById('output');
+
+        const formattedStartTime = formatDateTime(startTime);
+        const formattedEndTime = formatDateTime(endTime);
+
+        try {
+            const response = await fetch(`/leaveTime?start=${formattedStartTime}&end=${formattedEndTime}`);
+            const result = await response.text();
+            output.innerHTML = `结果: ${result}`;
+        } catch (error) {
+            output.innerHTML = `请求失败: ${error}`;
+        }
+    }
+</script>
+</body>
+</html>
