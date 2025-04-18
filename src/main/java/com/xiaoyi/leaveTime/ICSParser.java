@@ -6,15 +6,15 @@ import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.util.MapTimeZoneCache;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -104,13 +104,36 @@ public class ICSParser {
         }
     }
 
-    static void parseICS() {
-        try {
+    // http://calendars.icloud.com/holiday/cn_zh.ics
+    public static Mono<String> getIcsFileContent() {
+        WebClient webClient = WebClient.builder()
+                .baseUrl("https://calendars.icloud.com")
+                .build();
 
+        return webClient.get()
+                .uri("/holiday/cn_zh.ics")
+                .accept(MediaType.TEXT_PLAIN)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(10))
+                .onErrorResume(e -> {
+                    System.err.println("Error fetching calendar data: " + e.getMessage());
+                    return Mono.just("Error: Could not retrieve calendar data.");
+                });
+    }
+
+    static void parseICS() {
+        InputStream inputStream = null;
+        try {
             System.setProperty("net.fortuna.ical4j.timezone.cache.impl", MapTimeZoneCache.class.getName());
 
-            InputStream inputStream = ICSParser.class.getClassLoader().getResourceAsStream("CN_zh.ics");
-            assert inputStream != null;
+            String content = getIcsFileContent().block(); // 同步获取数据
+            if (content != null)
+                inputStream = new ByteArrayInputStream(content.getBytes());
+            else
+                throw new RuntimeException("Failed to fetch calendar data.");
+
+            // 读取 ICS 文件内容
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder fileContent = new StringBuilder();
             String line;
@@ -151,6 +174,16 @@ public class ICSParser {
             }
         } catch (IOException | ParserException e) {
             log.atError().log(e.getMessage());
+        } catch (Exception e) {
+            log.atError().log("Unexpected error: {}", e.getMessage());
+        } finally {
+            try {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                log.atError().log("Failed to close input stream: {}", e.getMessage());
+            }
         }
     }
 

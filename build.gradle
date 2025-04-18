@@ -12,13 +12,13 @@ java {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'GBK'
+    options.encoding = 'UTF-8'
 }
 tasks.withType(Javadoc).configureEach {
-    options.encoding = 'GBK'
+    options.encoding = 'UTF-8'
 }
 tasks.withType(JavaExec).configureEach {
-    jvmArgs = ['-Dfile.encoding=GBK', '-Dsun.stdout.encoding=GBK', '-Dsun.stderr.encoding=GBK']
+    jvmArgs = ['-Dfile.encoding=UTF-8', '-Dsun.stdout.encoding=UTF-8', '-Dsun.stderr.encoding=UTF-8']
 }
 
 
