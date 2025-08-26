@@ -97,11 +97,10 @@ public class ICSParser {
     }
 
     private static boolean isWorkDate(ZonedDateTime currenDt) {
-        if (specialDayMap.containsKey(currenDt.toLocalDate())) {
+        if (specialDayMap.containsKey(currenDt.toLocalDate()))
             return specialDayMap.get(currenDt.toLocalDate()).type.equals(WORKDAY);
-        } else {
-            return currenDt.toLocalDate().getDayOfWeek().getValue() < 6;
-        }
+
+        return currenDt.toLocalDate().getDayOfWeek().getValue() < 6;
     }
 
     // http://calendars.icloud.com/holiday/cn_zh.ics

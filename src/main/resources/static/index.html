@@ -1,67 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>downHair</title>
+    <title>请假时长计算</title>
+    <!-- 引入 Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* 定义颜色变量 */
+        :root {
+            --primary-color: #6a82fb;
+            --primary-dark-color: #4a67f7;
+            --background-gradient-start: #e0c3fc;
+            --background-gradient-end: #8ec5fc;
+            --container-bg-color: rgba(255, 255, 255, 0.95);
+            --text-color: #333;
+            --label-color: #555;
+            --border-color: #ddd;
+            --success-bg-color: #e9f7ef;
+            --success-border-color: #b8e9c4;
+            --success-text-color: #276c42;
+            --error-bg-color: #fdeaea;
+            --error-border-color: #f5b9b9;
+            --error-text-color: #a94442;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Poppins', "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            color: var(--text-color);
         }
 
         .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: var(--container-bg-color);
+            padding: 35px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .container:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* 日历图标 SVG */
+        .header svg {
+            width: 28px;
+            height: 28px;
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 22px;
         }
 
         .input-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--label-color);
+            font-size: 14px;
         }
 
         .input-group input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box; /* 确保 padding 不会影响宽度 */
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 8px rgba(106, 130, 251, 0.3);
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark-color));
             color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 130, 251, 0.3);
         }
 
         button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, var(--primary-dark-color), var(--primary-color));
+            box-shadow: 0 6px 20px rgba(106, 130, 251, 0.4);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: scale(0.98) translateY(0);
         }
 
         .output {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            margin-top: 25px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            min-height: 24px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            word-wrap: break-word;
+        }
+
+        .output.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 成功状态 */
+        .output.success {
+            background-color: var(--success-bg-color);
+            border-color: var(--success-border-color);
+            color: var(--success-text-color);
+        }
+
+        /* 错误/警告状态 */
+        .output.error {
+            background-color: var(--error-bg-color);
+            border-color: var(--error-border-color);
+            color: var(--error-text-color);
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <div class="header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"></path></svg>
+        <h2>请假时长计算</h2>
+    </div>
     <div class="input-group">
         <label for="start-time">开始时间:</label>
         <input type="datetime-local" id="start-time">
@@ -70,13 +173,14 @@
         <label for="end-time">结束时间:</label>
         <input type="datetime-local" id="end-time">
     </div>
-    <button onclick="submitTime()">提交</button>
+    <button onclick="submitTime()">提 交</button>
     <div class="output" id="output"></div>
 </div>
 
 <script>
     function formatDateTime(dateTime) {
         const date = new Date(dateTime);
+        if (isNaN(date.getTime())) return "";
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -91,15 +195,33 @@
         const endTime = document.getElementById('end-time').value;
         const output = document.getElementById('output');
 
+        // 先移除所有状态类，并添加 'visible' 以触发动画
+        output.classList.remove('success', 'error');
+        output.classList.add('visible');
+
+        if (!startTime || !endTime) {
+            output.innerHTML = "⚠️ 请输入完整的时间范围！";
+            output.classList.add('error');
+            return;
+        }
+
         const formattedStartTime = formatDateTime(startTime);
         const formattedEndTime = formatDateTime(endTime);
 
         try {
+            // 模拟 API 请求
             const response = await fetch(`/leaveTime?start=${formattedStartTime}&end=${formattedEndTime}`);
             const result = await response.text();
-            output.innerHTML = `结果: ${result}`;
+
+            // 使用模拟数据以供演示
+            // await new Promise(resolve => setTimeout(resolve, 500)); // 模拟网络延迟
+            // const result = "操作已记录";
+
+            output.innerHTML = `✅ 结果: ${result}`;
+            output.classList.add('success');
         } catch (error) {
-            output.innerHTML = `请求失败: ${error}`;
+            output.innerHTML = `❌ 请求失败: ${error}`;
+            output.classList.add('error');
         }
     }
 </script>
